@@ -1,0 +1,15 @@
+:root{
+  --bg:#d5f5d4; 
+  --card:#fff;
+}
+
+body{
+  margin:0;
+  font-family: Inter, system-ui, Arial, sans-serif;
+  background:var(--bg);
+  display:flex;
+  justify-content:center;
+  padding:40px 16px;
+}
+
+
