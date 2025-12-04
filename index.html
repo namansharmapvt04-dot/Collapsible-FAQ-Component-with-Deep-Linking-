@@ -1,108 +1,404 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>FAQit</title>
-
-  <!-- Link external CSS -->
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HelpCenter - Smart FAQ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .accordion-content {
+            transition: all 0.3s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .accordion-content.open {
+            max-height: 12rem; /* 48 in tailwind spacing roughly */
+            opacity: 1;
+            padding-bottom: 1.5rem; /* pb-6 */
+        }
+        .chevron {
+            transition: transform 0.2s ease;
+        }
+        .chevron.rotate {
+            transform: rotate(180deg);
+        }
+    </style>
 </head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
 
-<body>
-  <div class="container">
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center gap-2">
+                    <div class="bg-blue-600 p-2 rounded-lg">
+                        <i data-lucide="sparkles" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <span class="font-bold text-xl text-slate-800 tracking-tight">Help<span class="text-blue-600">Center</span></span>
+                </div>
 
-    <!-- HEADER -->
-    <div class="header-title">
-      <h1>FAQit</h1>
-      <h2>Have a question?</h2>
-      <p>Search our FAQ for answers or ask our AI assistant.</p>
-    </div>
+                <!-- Desktop Nav -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <button class="bg-slate-900 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-slate-800 transition-colors">
+                        Contact Support
+                    </button>
+                </div>
 
-    <!-- Search bar -->
-    <div class="ask">
-      <input placeholder="Ask me anything..." />
-      <button>Ask AI</button>
-    </div>
-    <!-- FAQ Section -->
-    <div class="faq-list">
-
-      <div class="faq-item">
-        <div class="question">
-          <span>What is your return policy?</span>
-          <div class="chev">›</div>
+                <!-- Mobile Menu Button -->
+                <div class="flex items-center md:hidden">
+                    <button id="mobile-menu-btn" class="text-slate-500 hover:text-slate-700">
+                        <i id="menu-icon" data-lucide="menu"></i>
+                    </button>
+                </div>
+            </div>
         </div>
-        <div class="answer">
-          We accept returns within 30 days of delivery if items are unused and in original packaging.
-        </div>
-      </div>
 
-      <div class="faq-item">
-        <div class="question">
-          <span>How do I track my order?</span>
-          <div class="chev">›</div>
+        <!-- Mobile Nav -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-slate-100 py-2">
+            <button class="block w-full text-left px-4 py-2 text-slate-600 hover:bg-slate-50 font-medium">
+                Contact Support
+            </button>
         </div>
-        <div class="answer">
-          A tracking link will be emailed after your order ships. You can also view it in your account.
-        </div>
-      </div>
+    </nav>
 
-      <div class="faq-item">
-        <div class="question">
-          <span>Can I change my shipping address?</span>
-          <div class="chev">›</div>
+    <!-- Main Content -->
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-grow">
+        
+        <!-- Hero Section -->
+        <div class="text-center mb-16">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight">
+                How can we <span class="text-blue-600">help you?</span>
+            </h1>
+            <p class="text-lg text-slate-600 mb-8 max-w-2xl mx-auto">
+                Browse our knowledge base for answers to common questions, or ask our AI assistant for personalized help.
+            </p>
         </div>
-        <div class="answer">
-          Yes — if your order has not shipped. Contact support immediately with your order number.
+
+        <!-- FAQ List Section -->
+        <div class="mb-20">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-slate-800">
+                    Popular Questions
+                </h2>
+                <span id="result-count" class="text-sm font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                    <!-- Count injected via JS -->
+                </span>
+            </div>
+
+            <div id="faq-container" class="space-y-2">
+                <!-- FAQ Items injected via JS -->
+            </div>
         </div>
-      </div>
 
-      <div class="faq-item">
-        <div class="question">
-          <span>Do you offer international shipping?</span>
-          <div class="chev">›</div>
+        <!-- AI Responder Section -->
+        <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 sm:p-10 text-white shadow-xl mt-12 relative overflow-hidden">
+            <!-- Decorative background elements -->
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white opacity-10 rounded-full blur-2xl"></div>
+            <div class="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-indigo-400 opacity-20 rounded-full blur-2xl"></div>
+
+            <div class="relative z-10 max-w-3xl mx-auto text-center">
+                <div class="inline-flex items-center gap-2 bg-blue-500/30 border border-blue-400/30 rounded-full px-4 py-1.5 mb-6 backdrop-blur-sm">
+                    <i data-lucide="sparkles" class="w-4 h-4 text-yellow-300"></i>
+                    <span class="text-sm font-medium text-blue-50">Powered by Gemini AI</span>
+                </div>
+                
+                <h2 class="text-3xl font-bold mb-4">Can't find what you're looking for?</h2>
+                <p class="text-blue-100 mb-8 max-w-2xl mx-auto">
+                    Our AI assistant can help answer specific questions about our services, policies, or general inquiries instantly.
+                </p>
+
+                <form id="ai-form" class="relative max-w-2xl mx-auto">
+                    <input
+                        type="text"
+                        id="ai-input"
+                        placeholder="Ask a question (e.g., 'How do I upgrade my plan?')"
+                        class="w-full pl-6 pr-14 py-4 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-500/30 shadow-lg text-lg"
+                    />
+                    <button 
+                        type="submit"
+                        id="ai-submit-btn"
+                        class="absolute right-2 top-2 bottom-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white p-2.5 rounded-lg transition-colors flex items-center justify-center aspect-square"
+                    >
+                        <i id="ai-btn-icon" data-lucide="send" class="w-5 h-5"></i>
+                        <div id="ai-loading-spinner" class="hidden w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </button>
+                </form>
+
+                <!-- AI Response Container -->
+                <div id="ai-response-container" class="hidden mt-8 text-left bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                     <!-- Dynamic Content -->
+                </div>
+            </div>
         </div>
-        <div class="answer">
-          Yes, we ship worldwide. Delivery time and customs fees depend on your country.
-        </div>
-      </div>
 
-      <div class="faq-item">
-        <div class="question">
-          <span>What payment methods do you accept?</span>
-          <div class="chev">›</div>
-        </div>
-        <div class="answer">
-          We accept Visa, Mastercard, PayPal, and Apple/Google Pay.
-        </div>
-      </div>
+        <!-- Footer -->
+        <footer class="mt-20 pt-8 border-t border-slate-200 text-center text-slate-500 text-sm pb-8">
+            <p>&copy; 2024 HelpCenter Inc. All rights reserved.</p>
+            <div class="flex justify-center gap-6 mt-4">
+                <a href="#" class="hover:text-slate-800 transition-colors">Privacy Policy</a>
+                <a href="#" class="hover:text-slate-800 transition-colors">Terms of Service</a>
+                <a href="#" class="hover:text-slate-800 transition-colors">Contact Us</a>
+            </div>
+        </footer>
 
-      <div class="faq-item">
-        <div class="question">
-          <span>How can I contact customer support?</span>
-          <div class="chev">›</div>
-        </div>
-        <div class="answer">
-          Email support@example.com or use the chat bubble on our site.
-        </div>
-      </div>
+    </main>
 
-    </div>
-  </div>
+    <script>
+        // --- Configuration ---
+        // I have inserted the key you provided. 
+        // WARNING: Do not share this file publicly with the key inside.
+        const apiKey = "AIzaSyCoNjld8kFMgGc568ZvuRL3rJrybaHGpgk"; 
 
-  <!-- JS for accordion toggle --> 
-   <script>
-    document.querySelectorAll('.faq-item').forEach(item=>{
-      item.addEventListener('click',()=>{
-        item.classList.toggle('open');
-      });
-    });
-    
+        // --- Data ---
+        const FAQ_DATA = [
+            {
+                category: "General",
+                questions: [
+                    {
+                        id: 1,
+                        q: "What is Gemini FAQ Assistant?",
+                        a: "Gemini FAQ Assistant is a smart knowledge base powered by Google's Gemini AI. It combines curated static answers with the ability to generate dynamic responses for unique user queries."
+                    },
+                    {
+                        id: 2,
+                        q: "Is this service free to use?",
+                        a: "Yes! The core FAQ browsing features are completely free. Advanced AI queries may be subject to usage limits depending on your subscription plan."
+                    }
+                ]
+            },
+            {
+                category: "Billing",
+                questions: [
+                    {
+                        id: 3,
+                        q: "How do I update my payment method?",
+                        a: "Go to Settings > Billing > Payment Methods. You can add a new credit card or link a PayPal account there."
+                    },
+                    {
+                        id: 4,
+                        q: "Where can I find my invoices?",
+                        a: "Invoices are emailed to you monthly. You can also download them from the 'History' tab in the Billing section."
+                    }
+                ]
+            },
+            {
+                category: "Account & Security",
+                questions: [
+                    {
+                        id: 5,
+                        q: "How do I reset my password?",
+                        a: "Click 'Forgot Password' on the login screen. We will send a secure link to your registered email address to create a new password."
+                    },
+                    {
+                        id: 6,
+                        q: "Is 2FA supported?",
+                        a: "Absolutely. We strongly recommend enabling Two-Factor Authentication (2FA) in your Security settings for added protection."
+                    }
+                ]
+            }
+        ];
 
-    
- </script> 
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderFAQ();
+            setupMobileMenu();
+            setupAIResponder();
+            lucide.createIcons();
+        });
 
-   
+        // --- FAQ Logic ---
+        function renderFAQ() {
+            const container = document.getElementById('faq-container');
+            const countSpan = document.getElementById('result-count');
+            
+            // Flatten questions
+            const allQuestions = FAQ_DATA.flatMap(cat => cat.questions);
+            
+            countSpan.textContent = `${allQuestions.length} result${allQuestions.length !== 1 ? 's' : ''}`;
 
+            if (allQuestions.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-300">
+                        <div class="mx-auto w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                            <i data-lucide="search" class="w-8 h-8 text-slate-400"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-slate-900">No articles found</h3>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = allQuestions.map(item => `
+                <div class="border border-slate-200 rounded-xl mb-3 overflow-hidden bg-white hover:border-blue-200 transition-all duration-200 shadow-sm hover:shadow-md">
+                    <button
+                        onclick="toggleAccordion(${item.id})"
+                        class="w-full px-6 py-4 flex items-center justify-between text-left focus:outline-none"
+                    >
+                        <span class="font-semibold text-slate-800 pr-4">${item.q}</span>
+                        <i id="chevron-${item.id}" data-lucide="chevron-down" class="chevron w-5 h-5 text-slate-400 flex-shrink-0"></i>
+                    </button>
+                    <div id="content-${item.id}" class="accordion-content px-6">
+                        <p class="text-slate-600 leading-relaxed">${item.a}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleAccordion(id) {
+            const content = document.getElementById(`content-${id}`);
+            const chevron = document.getElementById(`chevron-${id}`);
+            const isCurrentlyOpen = content.classList.contains('open');
+
+            // Close all others (optional, matching React behavior where we tracked one ID)
+            document.querySelectorAll('.accordion-content').forEach(el => {
+                el.classList.remove('open');
+            });
+            document.querySelectorAll('.chevron').forEach(el => {
+                el.classList.remove('rotate');
+                el.classList.remove('text-blue-500');
+                el.classList.add('text-slate-400');
+                // We need to re-initialize the icon if we manipulate DOM, but here CSS class swap is enough for color
+                // Actually lucide replaces <i> with <svg>, so we are targeting the svg now.
+                // The class list manipulation works on the svg element because Lucide copies classes.
+            });
+
+            if (!isCurrentlyOpen) {
+                content.classList.add('open');
+                chevron.classList.add('rotate');
+                chevron.classList.remove('text-slate-400');
+                chevron.classList.add('text-blue-500');
+            }
+        }
+
+        // --- Mobile Menu Logic ---
+        function setupMobileMenu() {
+            const btn = document.getElementById('mobile-menu-btn');
+            const menu = document.getElementById('mobile-menu');
+            const icon = document.getElementById('menu-icon');
+            let isOpen = false;
+
+            btn.addEventListener('click', () => {
+                isOpen = !isOpen;
+                if (isOpen) {
+                    menu.classList.remove('hidden');
+                    // We would ideally change icon to X here, but for simplicity keeping menu
+                } else {
+                    menu.classList.add('hidden');
+                }
+            });
+        }
+
+        // --- AI Responder Logic ---
+        function setupAIResponder() {
+            const form = document.getElementById('ai-form');
+            const input = document.getElementById('ai-input');
+            const submitBtn = document.getElementById('ai-submit-btn');
+            const btnIcon = document.getElementById('ai-btn-icon');
+            const spinner = document.getElementById('ai-loading-spinner');
+            const responseContainer = document.getElementById('ai-response-container');
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const query = input.value.trim();
+                if (!query) return;
+
+                // Set Loading State
+                input.disabled = true;
+                submitBtn.disabled = true;
+                btnIcon.classList.add('hidden');
+                spinner.classList.remove('hidden');
+                responseContainer.classList.add('hidden');
+                responseContainer.innerHTML = '';
+
+                try {
+                    const aiText = await fetchWithRetry(query);
+                    
+                    // Show Success
+                    responseContainer.innerHTML = `
+                        <div class="flex items-start gap-4">
+                            <div class="bg-white/20 p-2 rounded-lg flex-shrink-0">
+                                <i data-lucide="sparkles" class="w-6 h-6 text-yellow-300"></i>
+                            </div>
+                            <div class="space-y-2">
+                                <h4 class="font-semibold text-white text-lg">AI Response</h4>
+                                <p class="text-blue-50 leading-relaxed whitespace-pre-wrap">${escapeHtml(aiText)}</p>
+                            </div>
+                        </div>
+                    `;
+                } catch (error) {
+                    // Show Error
+                    responseContainer.innerHTML = `
+                        <div class="flex items-start gap-3 text-red-200">
+                             <i data-lucide="help-circle" class="w-6 h-6 flex-shrink-0 mt-0.5"></i>
+                             <p>I'm having trouble connecting right now. Please try again later.</p>
+                        </div>
+                    `;
+                    console.error(error);
+                } finally {
+                    // Reset State
+                    input.disabled = false;
+                    submitBtn.disabled = false;
+                    btnIcon.classList.remove('hidden');
+                    spinner.classList.add('hidden');
+                    responseContainer.classList.remove('hidden');
+                    lucide.createIcons(); // Re-render icons in the response area
+                }
+            });
+        }
+
+        async function fetchWithRetry(query, retries = 3, delay = 1000) {
+            try {
+                const response = await fetch(
+                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{
+                                    text: `You are a helpful, friendly customer support agent for a service called 'HelpCenter'. 
+                                    Answer the following user question concisely and professionally. 
+                                    If the question is about general knowledge, answer it. 
+                                    If it seems like a technical support issue not covered by general knowledge, suggest contacting human support.
+                                    
+                                    User Question: ${query}`
+                                }]
+                            }]
+                        })
+                    }
+                );
+
+                if (!response.ok) throw new Error(`API Error: ${response.status}`);
+                const data = await response.json();
+                const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!text) throw new Error("No response generated.");
+                return text;
+
+            } catch (err) {
+                if (retries > 0) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    return fetchWithRetry(query, retries - 1, delay * 2);
+                }
+                throw err;
+            }
+        }
+
+        // Utility to prevent XSS
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+    </script>
 </body>
 </html>
